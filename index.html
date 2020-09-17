@@ -25,13 +25,12 @@
             var arr = document.cookie.split(",");
             for (var i = 0; i < 10; i++)
                 if (arr[i] == "null")
-                    document.getElementById(i +"").value = "";
+                    document.getElementById((i + 1) + "").value = "";
                 else
-                    document.getElementById(i +"").value = arr[i]
+                    document.getElementById((i + 1) + "").value = arr[i]
         }
 
     }
-    
     var cook = "";;
     for (i = 1; i < 10; i++)
         if (document.getElementById(i+ "").value == "")
@@ -43,7 +42,7 @@
             cook += ",null";
         else
             cook += "," + document.getElementById("10").value;
-        
+    document.cookie = cook;
 
     
     const Direction = {
