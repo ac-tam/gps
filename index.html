@@ -1,0 +1,509 @@
+<html>
+    <body onload = "addData()">
+
+        <input type = "text" id = "1" value = "1W1"> <br>
+        <input type = "text" id = "2" value = "1W1"> <br>
+        <input type = "text" id = "3" value = "1W1"> <br>
+        <input type = "text" id = "4" value = "1W1"> <br>
+        <input type = "text" id = "5" value = "1W1"> <br>
+        <input type = "text" id = "6" value = "1W1"> <br>
+        <input type = "text" id = "7" value = "1W1"> <br>
+        <input type = "text" id = "8" value = "1W1"> <br>
+        <input type = "text" id = "9" value = "6W23"> <br>
+        <input type = "text" id = "10" value = "2E2">
+
+
+        <img src="img.png">
+    </body>
+    
+
+    
+
+<script>
+    function addData() {
+        if (document.cookie != "") {
+            var arr = document.cookie.split(",");
+            for (var i = 0; i < 10; i++)
+                if (arr[i] == "null")
+                    document.getElementById(i +"").value = "";
+                else
+                    document.getElementById(i +"").value = arr[i]
+        }
+
+    }
+    
+    var cook = "";;
+    for (i = 1; i < 10; i++)
+        if (document.getElementById(i+ "").value == "")
+            cook += ",null,";
+        else
+            cook += "," + document.getElementById(i +"").value + ",";
+        
+            if (document.getElementById("10").value == "")
+            cook += ",null";
+        else
+            cook += "," + document.getElementById("10").value;
+        
+
+    
+    const Direction = {
+        N: "N", S: "S", E: "E", W:"W", C:"C", 
+    }
+    class Room {
+
+
+
+    constructor(s) {
+
+
+    this.room = s;
+    this.isStairs = true;
+    if (s.includes("SW"))
+        this.coords = [27, 0];
+    else if (s.includes("SE"))
+        this.coords = [27, 14];
+    else if (s.includes("NE"))
+        this.coords = [0, 14];
+    else if (s.includes("NW"))
+        this.coords = [0, 0];
+    else if (s.includes("CE")) {
+        this.coords = [13, 14];
+        this.direct = Direction.E;
+    } else if (s.includes("CW")) {
+        this.coords = [13, 0];
+        this.direct = Direction.W;
+    } else {
+        this.isStairs = false;
+
+        if (s==(""))
+            this.s = "1W13";
+        if (s==("LOCK3")) {
+            this.floor = 3;
+            roomNumber = 12;
+            this.direct = Direction.S;
+            this.coords = [27, 6];
+        } else if (s==("LIB")) {
+            this.floor = 5;
+            this.room = "5W13";
+            this.roomNumber = 13;
+            this.direct = Direction.W;
+            this.coords = [13, 0];
+        } else {
+            this.floor = parseInt(s.substring(0, 1));
+
+            this.roomNumber = parseInt(s.substring(2));
+
+            switch (s.substring(1, 2)) {
+
+            case "N":
+            this.direct = Direction.N;
+            break;
+
+            case "W":
+            this.direct = Direction.W;
+                break;
+                        
+            case "E":
+            this.direct = Direction.E ;
+                break;
+            case "S":
+                this.direct = Direction.S ;
+                break;
+            } 
+
+        }
+
+        if (this.direct == Direction.E)
+            this.coords = [27 - this.roomNumber, 14];
+        if (this.direct == Direction.W)
+            this.coords = [this.roomNumber, 0];
+        if (this.direct == Direction.N)
+            this.coords = [0, 9 - this.roomNumber];
+        if (this.direct == Direction.S)
+            this.coords = [27, this.roomNumber];
+
+        if (this.direct == Direction.C)
+            this.coords = [13, 8 - this.roomNumber]; //!!
+    }
+}
+
+
+
+    getFloor() {
+    return this.floor;
+}
+
+
+    getRoomNumber() {
+    return this.roomNumber;
+}
+
+
+    getDirect() {
+    return this.direct;
+}
+
+
+    getRoom() {
+    return this.room;
+}
+
+
+    getCoords() {
+    return this.coords;
+}
+
+
+    opposite(other) {
+    if ((this.room.substring(1)==("NW") && other.getRoom().substring(1)==("SW")) ||
+            (this.room.substring(1)==("NE") && other.getRoom().substring(1)==("SE")) ||
+            (this.room.substring(1)==("SW") && other.getRoom().substring(1)==("NW")) ||
+            (this.room.substring(1)==("SE") && other.getRoom().substring(1)==("NE")))
+        return false;
+    return (Math.abs(this.coords[0] - other.getCoords()[0]) == 27 || Math.abs(this.coords[1] - other.getCoords()[1]) == 14);
+}
+
+    before(other) {
+    if (this.isStairs || other.isStairs) {
+        if ((other.getCoords()[0] == 27 || other.getCoords()[1] == 0) && (this.getCoords()[0] == 27 || this.getCoords()[1] == 0))
+            return (this.getCoords()[0] < other.getCoords()[0] || this.getCoords()[1] < other.getCoords()[1]);
+        else
+            return (this.getCoords()[0] > other.getCoords()[0] || this.getCoords()[1] > other.getCoords()[1]);
+
+    } else
+        return (this.getDirect() == other.getDirect()) && this.getRoomNumber() < other.getRoomNumber();
+}
+
+    beforeNonRelative(other) {
+    return this.getCoords()[0] < other.getCoords()[0] || this.getCoords()[1] < other.getCoords()[1];
+}
+
+
+    between( first, after) {
+    if (after.before(first))
+        return after.before(this) && this.before(first);
+    return first.before(this) && this.before(after);
+}
+
+    sameDirect(other) {
+    if (this.isStairs)
+        return this.getRoom().includes(other.getDirect().toString());
+    else if (other.isStairs)
+        return other.getRoom().includes(this.getDirect().toString());
+    else
+        return this.getDirect() == other.getDirect();
+}
+
+    lShape(other) {
+    switch (this.getCoords()[1] + "" + other.getCoords()[0]) {
+        case ("00"):
+        case ("270"):
+        case ("027"):
+        case ("2714"):
+        case ("1427"):
+        case ("014"):
+        case ("140"):
+            return true;
+        default:
+            return false;
+    }
+}
+}
+var starts;
+var startRoom, currentRoom, nextRoom, turnOne, turnTwo;
+var schedule;
+    var a = new Room("1N1");
+
+    var text = ["","","",""];
+    console.log(Direction.N)
+
+    starts = [
+            0, 
+            27000000, 
+            29880000, 
+            32400000,
+            39600000,
+            39600000,       
+            43200000,      
+            46800000,
+            50400000,
+            52200000                
+    ];
+    var now = new Date()
+    var diff = now.getTime() - new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,0,0).getTime()
+    for (var i = 10; i > - 1; i--)
+        if ( diff > starts[i]) {
+            startRoom = new Room(document.getElementById(i + "").value);
+            currentRoom = new Room(document.getElementById(i + "").value);
+            nextRoom = new Room(document.getElementById((i + 1) + "").value);
+            break;
+        }
+
+    var move = true;
+
+    if (nextRoom.getDirect() == Direction.C && currentRoom.getDirect() != Direction.C && currentRoom.getFloor() == nextRoom.getFloor())
+        if (currentRoom.getDirect() == Direction.E)
+            nextRoom = new Room(nextRoom.getFloor() + "E13");
+        else
+            nextRoom = new Room(nextRoom.getFloor() + "W13");
+
+
+    // determine floor
+    if (currentRoom.getFloor() < nextRoom.getFloor())
+        text[1] = ("Go up the stairs to the " + addSuffix(nextRoom.getFloor()) + " floor");
+    else if (currentRoom.getFloor() > nextRoom.getFloor())
+        text[1] = ("Go down the stairs to the " + addSuffix(nextRoom.getFloor()) + " floor");
+    else
+        move = false;
+
+
+    // go to the staircase
+    if (move) { //assign staircase
+        if (currentRoom.between(new Room("1E20"), new Room("1E28")) || //NE  E 21 - 27
+                currentRoom.between(new Room("1N0"), new Room("1N5"))) {   // 1 - 4
+            currentRoom = new Room(nextRoom.getFloor() + "NE");
+        } else if (currentRoom.between(new Room("1W0"), new Room("1W7")) || // NW // W 1 -  6
+                currentRoom.between(new Room("1N4"), new Room("1N9"))) {   // 5 - 8
+            currentRoom = new Room(nextRoom.getFloor() + "NW");
+        } else if (currentRoom.between(new Room("1E0"), new Room("1E7")) || //SE
+                currentRoom.between(new Room("1S7"), new Room("1S15"))) {
+            currentRoom = new Room(nextRoom.getFloor() + "SE");
+        } else if (currentRoom.between(new Room("1W20"), new Room("1W28")) || //SW
+                currentRoom.between(new Room("1S0"), new Room("1S8"))) {
+            currentRoom = new Room(nextRoom.getFloor() + "SW");
+        } else if (currentRoom.between(new Room("1W6"), new Room("1W21")) || // CW
+                currentRoom.between(new Room("1C5"), new Room("1C9"))) {
+            currentRoom = new Room(nextRoom.getFloor() + "CW");
+        } else if (currentRoom.between(new Room("1E5"), new Room("1E21")) || // CE
+                currentRoom.between(new Room("1C0"), new Room("1C6"))) {
+            currentRoom = new Room(nextRoom.getFloor() + "CE");
+        }
+
+        if (startRoom.before(currentRoom)) //go to stairs
+            text[0] = ("Turn right and go straight until you see the stairs and enter the " + currentRoom.getRoom().substring(1) + " staircase.");
+        else
+            text[0] = ("Turn left and go straight until you see the stairs and enter the " + currentRoom.getRoom().substring(1) + " staircase.");
+
+    }
+
+    if (currentRoom.getRoom()==(nextRoom.getRoom()))
+        text[0] = ("You're already at Room " + nextRoom.getRoom());
+
+
+        //same direction
+    else if (currentRoom.sameDirect(nextRoom)) {
+        if (currentRoom.isStairs) {
+            switch (currentRoom.getRoom().substring(1)) {
+                case "NW":
+                case "SE":
+                    if (currentRoom.before(nextRoom))
+                        text[2] = ("Turn right and walk straight. Look for Room " + nextRoom.getRoom());
+                    else
+                        text[2] = ("Exit the staircase and go straight. Look for " + nextRoom.getRoom());
+                    break;
+                case "SW":
+                case "NE":
+                    if (currentRoom.before(nextRoom))
+                        text[2] = ("Exit the staircase and go straight. Look for " + nextRoom.getRoom());
+                    else
+                        text[2] = ("Turn left and walk straight. Look for Room " + nextRoom.getRoom());
+                    break;
+                case "CW":
+                case "CE":
+                    if (currentRoom.before(nextRoom))
+                        text[2] = ("Turn right and walk straight. Look for Room " + nextRoom.getRoom());
+                    else
+                        text[2] = ("Turn left and walk straight. Look for Room " + nextRoom.getRoom());
+                    break;
+            }
+        } else if (currentRoom.before(nextRoom))
+            text[2] = ("Turn right and walk straight. Look for Room " + nextRoom.getRoom());
+        else
+            text[2] = ("Turn left and walk straight. Look for Room " + nextRoom.getRoom());
+    } else if (currentRoom.lShape(nextRoom)) {
+        switch (currentRoom.getCoords()[0] + "" + nextRoom.getCoords()[1]) {
+            case ("00"):
+                turnOne = new Room(currentRoom.getFloor() + "NW");
+                break;
+            case ("270"):
+            case ("027"):
+                turnOne = new Room(currentRoom.getFloor() + "SW");
+                break;
+            case ("2714"):
+            case ("1427"):
+                turnOne = new Room(currentRoom.getFloor() + "SE");
+                break;
+            case ("014"):
+            case ("140"):
+                turnOne = new Room(currentRoom.getFloor() + "NE");
+                break;
+        }
+
+        switch (currentRoom.getCoords()[1] + "" + nextRoom.getCoords()[0]) {
+            case ("00"):
+                turnOne = new Room(currentRoom.getFloor() + "NW");
+                break;
+            case ("270"):
+            case ("027"):
+                turnOne = new Room(currentRoom.getFloor() + "SW");
+                break;
+            case ("2714"):
+            case ("1427"):
+                turnOne = new Room(currentRoom.getFloor() + "SE");
+                break;
+            case ("014"):
+            case ("140"):
+                turnOne = new Room(currentRoom.getFloor() + "NE");
+                break;
+        }
+
+
+        if (currentRoom.before(turnOne))
+            switch (currentRoom.getRoom().substring(1)) {
+                case "SW":
+                case "NE":
+
+                    text[2] = ("Walk straight until the end of the building");
+                    break;
+                default:
+                    text[2] = ("Turn right and walk straight until the end of the building");
+            }
+        else
+            switch (currentRoom.getRoom().substring(1)) {
+                case "NW":
+                case "SE":
+                    text[2] = ("Walk straight until the end of the building");
+                    break;
+                default:
+                    text[2] = ("Turn left and walk straight until the end of the building");
+            }
+
+
+        if (nextRoom.getDirect() == Direction.W || nextRoom.getDirect() == Direction.S)
+            if (turnOne.beforeNonRelative(nextRoom))
+                text[3] = ("Turn left and walk straight and look for Room " + nextRoom.getRoom());
+            else
+                text[3] = ("Turn right and walk straight and look for Room " + nextRoom.getRoom());
+
+        else if (turnOne.beforeNonRelative(nextRoom))
+            text[3] = ("Turn right and walk straight and look for Room " + nextRoom.getRoom());
+        else
+            text[3] = ("Turn left and walk straight and look for Room " + nextRoom.getRoom());
+
+    }
+    // U or Snake Shape
+    else if (currentRoom.opposite(nextRoom)) {
+        if (Math.abs(nextRoom.getCoords()[0] - currentRoom.getCoords()[0]) != 27) //ew
+            if (nextRoom.getCoords()[1] - currentRoom.getCoords()[1] < 0) ///W to e
+                if (currentRoom.getCoords()[0] < 6 && nextRoom.getCoords()[0] < 6) {
+                    turnOne = new Room("1NE");
+                    turnTwo = new Room("1NW");
+                } else if (currentRoom.getCoords()[0] > 20 && nextRoom.getCoords()[0] > 20) {
+                    turnOne = new Room("1SE");
+                    turnTwo = new Room("1SW");
+                } else {
+                    turnOne = new Room("1CE");
+                    turnTwo = new Room("1CW");
+                }
+            else if (currentRoom.getCoords()[0] < 6 && nextRoom.getCoords()[0] < 6) {
+                turnTwo = new Room("1NE");
+                turnOne = new Room("1NW");
+            } else if (currentRoom.getCoords()[0] > 20 && nextRoom.getCoords()[0] > 20) {
+                turnTwo = new Room("1SE");
+                turnOne = new Room("1SW");
+            } else {
+                turnTwo = new Room("1CE");
+                turnOne = new Room("1CW");
+            }
+
+
+        else if (nextRoom.getCoords()[0] - currentRoom.getCoords()[0] < 0)
+            if (currentRoom.getCoords()[1] < 5) {
+                turnOne = new Room("1SW");
+                turnTwo = new Room("1NW");
+            } else {
+                turnOne = new Room("1SE");
+                turnTwo = new Room("1NE");
+            }
+
+
+        else if (currentRoom.getCoords()[1] < 5) {
+            turnOne = new Room("1NW");
+            turnTwo = new Room("1SW");
+        } else {
+            turnOne = new Room("1NE");
+            turnTwo = new Room("1SE");
+        }
+
+        if (startRoom.before(currentRoom))
+            text[0] = ("Turn right and go straight until you see the stairs and enter the " + currentRoom.getRoom().substring(1) + " staircase.");
+        else
+            text[0] = ("Turn left and go straight until you see the stairs and enter the " + currentRoom.getRoom().substring(1) + " staircase.");
+
+
+        if (currentRoom.getFloor() != nextRoom.getFloor()) {
+            if (currentRoom.getCoords()[0] == turnOne.getCoords()[0])
+                text[2] = ("From the staircase, walk all the way down to the other side of the building");
+            else if (turnOne.getRoom().substring(1).includes(("N")) || turnOne.getRoom().substring(1).includes(("W"))) //!
+                if (currentRoom.before(turnOne))
+                    text[2] = ("Turn right and walk straight and look the center stairs. Turn at the stairs and cross the center.");
+                else
+                    text[2] = ("Turn left and walk straight and look for the center stairs. Turn at the stairs and cross the center.");
+            else if (currentRoom.beforeNonRelative(turnOne))
+                text[2] = ("Turn left and walk straight and look for the center stairs. Turn at the stairs and cross the center.");
+            else
+                text[2] = ("Turn right and walk straight and look for the center stairs. Turn at the stairs and cross the center.");
+        } else
+            text[2] = ("Walk all the way down to the other side of the building");
+
+
+        if (nextRoom.getDirect() == Direction.W || nextRoom.getDirect() == Direction.S) //!
+            if (turnTwo.before(nextRoom))
+                text[3] = ("Turn left and walk straight and look for Room " + nextRoom.getRoom());
+            else
+                text[3] = ("Turn right and walk straight and look for Room " + nextRoom.getRoom());
+        else if (turnTwo.beforeNonRelative(nextRoom))
+            text[3] = ("Turn right and walk straight and look for Room " + nextRoom.getRoom());
+        else
+            text[3] = ("Turn left and walk straight and look for Room " + nextRoom.getRoom());
+
+
+        if (nextRoom.getFloor() == 5 && turnOne.getRoom().includes("C")) {
+            var temp = text[1];
+            text[1] = text[2];
+            text[2] = (temp);
+
+            if (text[3].includes("left"))
+                text[3] = ("Turn right and walk straight and look for Room " + nextRoom.getRoom());
+            else
+                text[3] = ("Turn left and walk straight and look for Room " + nextRoom.getRoom());
+
+        }
+    }
+        console.log("text");
+
+        console.log(text);
+
+    
+
+
+function addSuffix(floor) {
+    if (floor == 1)
+        return floor + "st";
+    if (floor == 2)
+        return floor + "nd";
+    if (floor == 3)
+        return floor + "rd";
+    return floor + "th";
+}
+
+
+</script>
+
+
+
+</html>
