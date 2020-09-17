@@ -13,7 +13,7 @@
         <input type = "text" id = "10" value = "2E2">
 
 
-        <img src="img.png">
+        <button onclick="saveCookie()">Save Cookie</button>
     </body>
     
 
@@ -31,18 +31,20 @@
         }
 
     }
+    function saveCookie() {
     var cook = "";;
-    for (i = 1; i < 10; i++)
-        if (document.getElementById(i+ "").value == "")
-            cook += "null,";
-        else
-            cook += document.getElementById(i +"").value + ",";
-        
-                if (document.getElementById("10").value == "")
-            cook += "null";
-                else
-            cook += document.getElementById("10").value;
-    document.cookie = cook;
+        for (i = 1; i < 10; i++)
+            if (document.getElementById(i+ "").value == "")
+                cook += "null,";
+            else
+                cook += document.getElementById(i +"").value + ",";
+            
+                    if (document.getElementById("10").value == "")
+                cook += "null";
+                    else
+                cook += document.getElementById("10").value;
+        document.cookie = cook;
+    }
 
     
     const Direction = {
