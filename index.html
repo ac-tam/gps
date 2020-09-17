@@ -32,19 +32,33 @@
 
     }
     var cook = "";;
-    for (i = 1; i < 10; i++)
+
+    if (document.getElementById("1").value == "")
+        cook += "null,";
+    else
+        cook +=  document.getElementById("1").value + ",";
+
+    for (i = 2; i < 10; i++)
         if (document.getElementById(i+ "").value == "")
             cook += ",null,";
         else
             cook += "," + document.getElementById(i +"").value + ",";
         
-            if (document.getElementById("10").value == "")
-            cook += ",null";
-        else
-            cook += "," + document.getElementById("10").value;
+
+    if (document.getElementById("10").value == "")
+        cook += ",null";
+    else
+        cook += "," + document.getElementById("10").value;
+
+
     document.cookie = cook;
 
     
+
+
+
+
+
     const Direction = {
         N: "N", S: "S", E: "E", W:"W", C:"C", 
     }
